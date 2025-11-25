@@ -77,30 +77,28 @@ Penjelasan: jika API mengembalikan struktur nested (`data.token` dan `data.user`
 
 **Dokumentasi Output (Screenshots)**
 
-- **Registrasi**  
-	https://github.com/Nadzare/tokokita/blob/main/docs/registrasi.png
+### 1. Registrasi
+![Registrasi](https://github.com/Nadzare/tokokita/blob/main/docs/registrasi.png)
 
-- **Login**  
-	https://github.com/Nadzare/tokokita/blob/main/docs/login.png
+### 2. Login
+![Login](https://github.com/Nadzare/tokokita/blob/main/docs/login.png)
 
-- **List Produk**  
-	https://github.com/Nadzare/tokokita/blob/main/docs/list.png
+### 3. List Produk
+![List Produk](https://github.com/Nadzare/tokokita/blob/main/docs/list.png)
 
-- **Drawer / Side**  
-	https://github.com/Nadzare/tokokita/blob/main/docs/side.png
+### 4. Drawer / Side Menu
+![Side Menu](https://github.com/Nadzare/tokokita/blob/main/docs/side.png)
 
-- **Tambah Produk**  
-	https://github.com/Nadzare/tokokita/blob/main/docs/tambah.png
+### 5. Tambah Produk
+![Tambah Produk](https://github.com/Nadzare/tokokita/blob/main/docs/tambah.png)
 
-- **Edit Produk**  
-	https://github.com/Nadzare/tokokita/blob/main/docs/edit.png
+### 6. Edit Produk
+![Edit Produk](https://github.com/Nadzare/tokokita/blob/main/docs/edit.png)
 
-- **Detail Produk**  
-	https://github.com/Nadzare/tokokita/blob/main/docs/detail.png
+### 7. Detail Produk
+![Detail Produk](https://github.com/Nadzare/tokokita/blob/main/docs/detail.png)
 
-> Pastikan file-file gambar berada di folder `docs/` agar link di atas menampilkan gambar pada GitHub.
-
----
+> Pastikan file-file gambar berada di folder `docs/` agar screenshot tampil pada README GitHub.---
 
 **Cara Menjalankan (singkat)**
 
