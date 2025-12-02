@@ -7,6 +7,8 @@ class Registrasi {
 
   factory Registrasi.fromJson(Map<String, dynamic> obj) {
     return Registrasi(
-        code: obj['code'], status: obj['status'], data: obj['data']);
+        code: int.tryParse(obj['code'].toString()) ?? 0,
+        status: obj['status'],
+        data: obj['data']?.toString());
   }
 }

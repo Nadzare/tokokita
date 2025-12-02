@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tokokita/bloc/registrasi_bloc.dart';
+import 'package:tokokita/widget/success_dialog.dart';
+import 'package:tokokita/widget/warning_dialog.dart';
 
 class RegistrasiPage extends StatefulWidget {
   const RegistrasiPage({Key? key}) : super(key: key);
@@ -13,6 +16,7 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
   final _emailTextboxController = TextEditingController();
   final _passwordTextboxController = TextEditingController();
   final _passwordKonfirmasiTextboxController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -173,27 +177,60 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        icon: const Icon(Icons.app_registration_rounded),
-        label: const Text("DAFTAR", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        onPressed: () {
+        icon: _isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Icon(Icons.app_registration_rounded),
+        label: Text(
+          _isLoading ? "Loading..." : "DAFTAR",
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        onPressed: _isLoading ? null : () {
           var validate = _formKey.currentState!.validate();
           if (validate) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text("Registrasi berhasil!"),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.pop(context);
+            _submit();
           }
         },
       ),
     );
+  }
+
+  void _submit() {
+    _formKey.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
+    RegistrasiBloc.registrasi(
+            nama: _namaTextboxController.text,
+            email: _emailTextboxController.text,
+            password: _passwordTextboxController.text)
+        .then((value) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => SuccessDialog(
+                description: "Registrasi berhasil, silahkan login",
+                okClick: () {
+                  Navigator.pop(context);
+                },
+              ));
+    }, onError: (error) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => WarningDialog(
+                description: error.toString(),
+              ));
+    }).whenComplete(() {
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 }

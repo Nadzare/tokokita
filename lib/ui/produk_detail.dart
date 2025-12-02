@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tokokita/bloc/produk_bloc.dart';
 import 'package:tokokita/model/produk.dart';
 import 'package:tokokita/ui/produk_form.dart';
 import 'package:tokokita/ui/produk_page.dart';
+import 'package:tokokita/widget/warning_dialog.dart';
+import 'package:tokokita/widget/success_dialog.dart';
 
 class ProdukDetail extends StatefulWidget {
   final Produk? produk;
@@ -180,24 +183,30 @@ class _ProdukDetailState extends State<ProdukDetail> {
           ),
           child: const Text("HAPUS"),
           onPressed: () {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text("Produk berhasil dihapus!"),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const ProdukPage()),
-              (Route<dynamic> route) => false,
-            );
+            Navigator.pop(context); // Close confirmation dialog first
+            ProdukBloc.deleteProduk(id: int.parse(widget.produk!.id!)).then(
+                (value) => {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) => SuccessDialog(
+                                description: "Berhasil menghapus produk!",
+                                okClick: () {
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              const ProdukPage()),
+                                      (Route<dynamic> route) => false);
+                                },
+                              ))
+                    }, onError: (error) {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) => WarningDialog(
+                        description: "Hapus gagal, silahkan coba lagi",
+                      ));
+              return null;
+            });
           },
         ),
       ],
