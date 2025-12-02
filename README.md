@@ -1,5 +1,5 @@
 # tokokita
-
+**Tugas 8 - Pertemuan 10** 
 **Tugas 9 - Pertemuan 11**  
 *Update: API Integration with Backend*
 
@@ -121,7 +121,7 @@ Backend API (CodeIgniter 4)
 
 ### 1. Helper Layer
 
-**`lib/helpers/api.dart`** - HTTP Wrapper
+**`lib/helpers/api.dart`** - HTTP Wrapper dengan Bearer Token
 ```dart
 class Api {
   Future<dynamic> post(dynamic url, dynamic data) async {
@@ -131,24 +131,43 @@ class Api {
         headers: {HttpHeaders.authorizationHeader: "Bearer $token"});
     return _returnResponse(response);
   }
-  // ... method get, put, delete mirip
+  
+  Future<dynamic> put(dynamic url, dynamic data) async {
+    var token = await UserInfo().getToken();
+    final response = await http.put(
+      Uri.parse(url),
+      body: json.encode(data),
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $token",
+        HttpHeaders.contentTypeHeader: "application/json",
+      },
+    );
+    return _returnResponse(response);
+  }
+  // ... method get, delete mirip
 }
 ```
-- Inject Bearer Token otomatis di setiap request
+**Penjelasan:**
+- Inject Bearer Token otomatis di setiap request dari SharedPreferences
+- Method PUT menggunakan `json.encode(data)` dengan header `Content-Type: application/json` agar backend CodeIgniter bisa membaca body request dengan benar
 - Handle error dengan custom exception (400, 401, 403, 422, 500)
 - Gunakan `http` package untuk HTTP calls
 
-**`lib/helpers/api_url.dart`** - Centralized Endpoints
+**`lib/helpers/api_url.dart`** - Centralized Endpoints dengan Koneksi Backend
 ```dart
 class ApiUrl {
-  static const String baseUrl = 'http://10.0.2.2/toko-api/public';
+  static const String baseUrl = 'http://192.168.100.13:8080';
   static const String registrasi = baseUrl + '/registrasi';
   static const String login = baseUrl + '/login';
   static const String listProduk = baseUrl + '/produk';
   static const String createProduk = baseUrl + '/produk';
   
   static String updateProduk(int id) {
-    return baseUrl + '/produk/' + id.toString() + '/update';
+    return baseUrl + '/produk/' + id.toString();
+  }
+  
+  static String showProduk(int id) {
+    return baseUrl + '/produk/' + id.toString();
   }
   
   static String deleteProduk(int id) {
@@ -156,8 +175,21 @@ class ApiUrl {
   }
 }
 ```
-- Base URL `10.0.2.2` adalah localhost untuk Android Emulator
-- Untuk device fisik, ganti dengan IP laptop (misal `192.168.x.x`)
+**Penjelasan Koneksi dengan Backend CodeIgniter:**
+- **Base URL**: `http://192.168.100.13:8080` adalah IP address laptop yang menjalankan backend CodeIgniter
+- **Endpoint Mapping**:
+  - `POST /registrasi` → Registrasi user baru ke database
+  - `POST /login` → Autentikasi user, return JWT token
+  - `GET /produk` → Mengambil semua data produk (memerlukan Bearer token)
+  - `POST /produk` → Menambah produk baru (memerlukan Bearer token)
+  - `PUT /produk/{id}` → Update produk berdasarkan ID (memerlukan Bearer token)
+  - `DELETE /produk/{id}` → Hapus produk berdasarkan ID (memerlukan Bearer token)
+
+**Catatan Penting untuk Base URL:**
+- **Android Emulator**: Gunakan `http://10.0.2.2:8080` (10.0.2.2 adalah alias untuk localhost host machine)
+- **Browser/Web**: Gunakan `http://localhost:8080`
+- **Device Fisik**: Gunakan IP laptop di network yang sama (contoh: `http://192.168.100.13:8080`)
+- Pastikan backend CodeIgniter sudah running dengan `php spark serve`
 
 **`lib/helpers/user_info.dart`** - Token Storage
 ```dart
@@ -325,28 +357,39 @@ flutter pub get
 
 **Dokumentasi Output (Screenshots)**
 
-### 1. Registrasi
-![Registrasi](https://github.com/Nadzare/tokokita/blob/main/docs/registrasi.png)
+### 1. Form Registrasi
+![Form Registrasi](https://github.com/Nadzare/tokokita/blob/main/docs/fmregis.png)
+*Halaman registrasi dengan field nama, email, password, dan konfirmasi password*
 
-### 2. Login
-![Login](https://github.com/Nadzare/tokokita/blob/main/docs/login.png)
+### 2. Popup Registrasi Berhasil
+![Popup Registrasi](https://github.com/Nadzare/tokokita/blob/main/docs/popregis.png)
+*Dialog sukses setelah registrasi berhasil, redirect ke halaman login*
 
-### 3. List Produk
-![List Produk](https://github.com/Nadzare/tokokita/blob/main/docs/list.png)
+### 3. Form Tambah Produk
+![Form Tambah Produk](https://github.com/Nadzare/tokokita/blob/main/docs/fmtambah.png)
+*Halaman untuk menambahkan produk baru dengan field kode, nama, dan harga*
 
-### 4. Drawer / Side Menu
-![Side Menu](https://github.com/Nadzare/tokokita/blob/main/docs/side.png)
+### 4. Popup Tambah Produk Berhasil
+![Popup Tambah](https://github.com/Nadzare/tokokita/blob/main/docs/poptambah.png)
+*Dialog konfirmasi "Berhasil menambahkan produk!" setelah create berhasil*
 
-### 5. Tambah Produk
-![Tambah Produk](https://github.com/Nadzare/tokokita/blob/main/docs/tambah.png)
+### 5. Form Edit Produk
+![Form Edit Produk](https://github.com/Nadzare/tokokita/blob/main/docs/fmedit.png)
+*Halaman edit produk dengan field yang sudah terisi data existing*
 
-### 6. Edit Produk
-![Edit Produk](https://github.com/Nadzare/tokokita/blob/main/docs/edit.png)
+### 6. Popup Edit Produk Berhasil
+![Popup Edit](https://github.com/Nadzare/tokokita/blob/main/docs/popedit.png)
+*Dialog konfirmasi "Berhasil mengubah produk!" setelah update berhasil*
 
-### 7. Detail Produk
-![Detail Produk](https://github.com/Nadzare/tokokita/blob/main/docs/detail.png)
+### 7. Konfirmasi Delete Produk
+![Konfirmasi Delete](https://github.com/Nadzare/tokokita/blob/main/docs/konfdel.png)
+*Dialog konfirmasi sebelum menghapus produk - "Yakin ingin menghapus produk ini?"*
 
-> Pastikan file-file gambar berada di folder `docs/` agar screenshot tampil pada README GitHub.
+### 8. Popup Delete Produk Berhasil
+![Popup Delete](https://github.com/Nadzare/tokokita/blob/main/docs/popdel.png)
+*Dialog konfirmasi "Berhasil menghapus produk!" setelah delete berhasil*
+
+> **Note**: Semua operasi CRUD (Create, Read, Update, Delete) dilengkapi dengan popup feedback untuk user experience yang lebih baik. Success dialog menggunakan `SuccessDialog` widget dengan callback untuk navigasi setelah user klik OK.
 
 ---
 
@@ -425,15 +468,47 @@ flutter pub get
 ✅ Login dengan token authentication  
 ✅ Auto login (cek token saat app start)  
 ✅ List produk dari API dengan loading state  
-✅ Create produk baru  
-✅ Update produk existing  
-✅ Delete produk dengan konfirmasi  
+✅ Create produk baru dengan popup success  
+✅ Update produk existing dengan popup success  
+✅ Delete produk dengan konfirmasi dan popup success  
 ✅ Detail produk  
 ✅ Logout (clear token)  
 ✅ Bearer token injection otomatis  
 ✅ Error handling dengan custom dialog  
 ✅ Orange theme dengan modern icons  
 ✅ Loading indicators pada setiap async operation  
+✅ Success dialog untuk semua operasi CRUD  
+✅ PUT request dengan JSON encoding untuk kompatibilitas CodeIgniter  
+
+---
+
+**Perbaikan Khusus untuk Update Produk**
+
+Masalah yang ditemui:
+- Backend CodeIgniter tidak bisa membaca body dari PUT request dengan format form-data
+- Data produk yang dikirim menjadi kosong (empty string dan harga 0)
+
+Solusi yang diterapkan:
+```dart
+// api.dart - Method PUT
+Future<dynamic> put(dynamic url, dynamic data) async {
+  var token = await UserInfo().getToken();
+  final response = await http.put(
+    Uri.parse(url),
+    body: json.encode(data),  // Encode data menjadi JSON
+    headers: {
+      HttpHeaders.authorizationHeader: "Bearer $token",
+      HttpHeaders.contentTypeHeader: "application/json",  // Set Content-Type
+    },
+  );
+  return _returnResponse(response);
+}
+```
+
+Dengan perubahan ini:
+- Data dikirim dalam format JSON yang bisa dibaca CodeIgniter
+- Header `Content-Type: application/json` memastikan backend parse body dengan benar
+- Update produk berhasil dengan data lengkap  
 
 ---
 
